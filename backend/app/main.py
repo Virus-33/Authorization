@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.security import OAuth2PasswordBearer
 
-from routers import authenticate
+from .routers import router
 
 from pydantic import BaseModel
 
@@ -29,4 +29,4 @@ app.add_middleware(
 
 # Base.metadata.create_all(bind=engine)
 
-app.include_router(authenticate.router)
+app.include_router(router)

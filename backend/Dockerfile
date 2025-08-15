@@ -1,10 +1,14 @@
 FROM python:3.12
 
-WORKDIR /backend/app
+WORKDIR /
 
-COPY . /backend/app
+COPY requirements.txt .
 
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ['uvicorn main:app --port 5431']
+COPY . /app
+
+ENV PYTHONPATH=/app
+
+CMD uvicorn app.main:app --host 0.0.0.0 --port 5431
