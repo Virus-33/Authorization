@@ -1,11 +1,11 @@
 from passlib.context import CryptContext
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, status
 
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 
-from ..models.data_models import UserHash, TokenData
+from ..schemas.data_models import UserHash, TokenData
 
 from ..config.tokens import SECRET_KEY, ALGORITHM
 from ..config.db import get_db
@@ -22,14 +22,16 @@ def get_password_hash(password: str):
     return pwd_context.hash(password)
 
 
-def get_user(db, username: str):
+def get_user(username: str):
+    db = get_db()
     if username in db:
         user_data = db[username]
         return UserHash(**user_data)
 
 
-def authenticate_user(db, username: str, password: str):
-    user = get_user(db, username)
+def authenticate_user(username: str, password: str):
+    db = get_db()
+    user = get_user(username)
     if not user:
         return False
     if not verify_password(password, user.hashed_password):
