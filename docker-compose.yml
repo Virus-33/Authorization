@@ -12,6 +12,14 @@ services:
       - .env
     network_mode: 'host'
 
+  back:
+    build: backend/
+    command: cd .\backend\app && uvicorn main:app --port 5432
+    ports:
+      - 5432:5432
+    depends_on:
+      - postgres_db
+
   pgadmin_app:
     image: dpage/pgadmin_container
     restart: always
