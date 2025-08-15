@@ -3,36 +3,46 @@ services:
 
   postgres_db:
     image: postgres:latest
-    restart: always
     container_name: postgres_container
-    command: -p 7999
+    command: -p 5432
     volumes:
-      - ./docker/pg-data:/var/lib/postgresql/data/
+      - pg_data:/var/lib/postgresql/data
     env_file:
       - .env
     network_mode: 'host'
+    ports:
+      - 5431:5431
 
   back:
     build: backend/
-    command: cd .\backend\app && uvicorn main:app --port 5432
     ports:
-      - 5432:5432
+      - 5431:5431
     depends_on:
       - postgres_db
+    env_file:
+      - .env
 
   pgadmin_app:
-    image: dpage/pgadmin_container
-    restart: always
+    image: dpage/pgadmin4:7.8
     container_name: pgadmin_container
-    user: '${UID}:${GID}'
+    user: '101:101'
     volumes:
-      - ./docker/pgadmin-data:/var/lib/pgadmin
+      - pgadmin_data:/var/lib/pgadmin
+      - pgadmin_logs:/var/log/pgadmin
     env_file:
       - .env
     depends_on:
       - postgres_db
     network_mode: 'host'
+    ports:
+      - 5050:5050
+    command: >
+      sh -c "
+      chown -R 101:101 /var/log/pgadmin
+      /entrypoint.sh
+      "
 
 volumes:
   pg_data:
   pgadmin_data:
+  pgadmin_logs:
