@@ -8,7 +8,7 @@ from jose import JWTError, jwt
 from sqlalchemy import select
 
 from ..models.Users import UsersModel
-from ..schemas.data_models import UserHash, TokenData, UserModel, User
+from ..schemas.data_models import TokenData, UserModel, User
 
 from ..config.tokens import SECRET_KEY, ALGORITHM
 from ..config.db import get_db

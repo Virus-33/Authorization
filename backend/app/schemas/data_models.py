@@ -17,10 +17,6 @@ class User(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class UserHash(User):
-    hashed_password: str
-
-
 class UserModel(BaseModel):
     id: int
     name: str
