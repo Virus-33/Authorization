@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class Token(BaseModel):
@@ -7,12 +7,14 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    username: str or None = None
+    name: str or None = None
 
 
 class User(BaseModel):
-    username: str
+    name: str
     disabled: bool or None = None
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserHash(User):
@@ -24,4 +26,6 @@ class UserModel(BaseModel):
     name: str
     disabled: bool
     password: str
+
+    model_config = ConfigDict(from_attributes=True)
 

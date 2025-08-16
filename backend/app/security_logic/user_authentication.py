@@ -5,7 +5,10 @@ from fastapi import Depends, HTTPException, status
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 
-from ..schemas.data_models import UserHash, TokenData
+from sqlalchemy import select
+
+from ..models.Users import UsersModel
+from ..schemas.data_models import UserHash, TokenData, UserModel, User
 
 from ..config.tokens import SECRET_KEY, ALGORITHM
 from ..config.db import get_db
@@ -22,28 +25,30 @@ def get_password_hash(password: str):
     return pwd_context.hash(password)
 
 
-def get_user(username: str):
-    db = get_db()
-    if username in db:
-        user_data = db[username]
-        return UserHash(**user_data)
+def get_user(username: str, db):
+    selection = select(UsersModel).where(UsersModel.name == username).limit(1)
+    user = db.execute(selection).scalar()
+    if user is not None:
+        res = UserModel.model_validate(user)
+        return res
 
 
-def authenticate_user(username: str, password: str):
-    user = get_user(username)
+def authenticate_user(username: str, password: str, db):
+    user = get_user(username, db)
     if not user:
+        print('User not found')
         return False
-    if not verify_password(password, user.hashed_password):
+    if not verify_password(password, user.password):
         return False
-    return True
+    return user
 
 
 def create_token(data: dict, expires_delta: timedelta or None=None):
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.utcnow()+expires_delta
+        expire = datetime.now()+expires_delta
     else:
-        expire = datetime.utcnow()+timedelta(minutes=15)
+        expire = datetime.now()+timedelta(minutes=15)
 
     to_encode.update({'exp': expire})
     encoded_token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
@@ -60,20 +65,23 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         username: str = payload.get('sub')
         if not username:
             raise credential_exception
-        token_data = TokenData(username=username)
+        token_data = TokenData(name=username)
     except JWTError:
         raise credential_exception
 
-    user = get_user(get_db(), username=token_data.username)
+    gen = get_db()
+    db = next(gen)
+    user = User.model_validate(get_user(token_data.name, db))
     if not user:
         raise credential_exception
     else:
         return user
 
 
-async def get_current_active_user(current_user: UserHash = Depends(get_current_user)):
-    if current_user.expired:
+async def get_current_active_user(current_user: User = Depends(get_current_user)):
+    if current_user.disabled:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail='Inactive user',
                             headers={'WWW-Authenticate': 'Bearer'})
-
+    else:
+        return current_user
