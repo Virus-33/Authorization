@@ -4,12 +4,12 @@ services:
   postgres_db:
     image: postgres:latest
     container_name: postgres_container
+    restart: always
     command: -p 5432
     volumes:
       - pg_data:/var/lib/postgresql/data
     env_file:
       - .env
-    network_mode: 'host'
 
   back:
     build: backend/
@@ -20,22 +20,17 @@ services:
     env_file:
       - .env
 
-  pgadmin_app:
-    image: dpage/pgadmin4:7.8
-    container_name: pgadmin_container
-    user: root
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-      - pgadmin_logs:/var/log/pgadmin
+  adminer_app:
+    image: adminer
+    container_name: adminer_container
+    user: '111'
+    restart: always
     env_file:
       - .env
     depends_on:
       - postgres_db
-    network_mode: 'host'
     ports:
-      - 5051:5051
+      - 8080:8080
 
 volumes:
   pg_data:
-  pgadmin_data:
-  pgadmin_logs:

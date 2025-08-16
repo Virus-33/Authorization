@@ -30,7 +30,6 @@ def get_user(username: str):
 
 
 def authenticate_user(username: str, password: str):
-    db = get_db()
     user = get_user(username)
     if not user:
         return False

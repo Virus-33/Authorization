@@ -5,9 +5,10 @@ from sqlalchemy.orm import mapped_column
 from ..config.db import Base
 
 
-class Users(Base):
+class UsersModel(Base):
     __tablename__ = 'users'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
-    name: Mapped[String] = mapped_column(String(40), nullable=False)
+    name: Mapped[String] = mapped_column(String(30), nullable=False)
     disabled: Mapped[Boolean] = mapped_column(Boolean, nullable=False)
+    password: Mapped[String] = mapped_column(String, nullable=False)

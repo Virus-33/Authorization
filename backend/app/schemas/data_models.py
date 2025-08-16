@@ -18,3 +18,10 @@ class User(BaseModel):
 class UserHash(User):
     hashed_password: str
 
+
+class UserModel(BaseModel):
+    id: int
+    name: str
+    disabled: bool
+    password: str
+

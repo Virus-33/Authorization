@@ -13,7 +13,6 @@ from ..schemas import Token, User
 from ..security_logic import user_authentication
 
 router =APIRouter(
-    prefix='/api',
     tags=['auth']
 )
 
